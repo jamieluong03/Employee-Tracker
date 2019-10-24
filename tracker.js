@@ -92,30 +92,30 @@ function addEmployee(){
     return inquirer.prompt([
         {
             type: "input",
-            message: "Enter first name",
+            message: "What is the employee's first name?",
             name: "first_name",
-            // validate: function validateFirst (name){
-            //     return name! == '';
-            // }
+            validate: function validateFirst (name){
+                return name !== '';
+            }
         },
         {
             type: "input",
-            message: "Enter last name",
+            message: "What is the employee's last name?",
             name: "last_name",
-            // validate: function validateLast(name) {
-            //     return name! =='';
-            // }
+            validate: function validateLast(name) {
+                return name !== '';
+            }
         },
         {
             type: "list",
-            message: "What is the role id? (1-salesperson, 2-lawyer, 3-engineer)",
+            message: "What is the employee's role? (1-salesperson, 2-lawyer, 3-engineer)",
             choices: [1, 2, 3],
             name: "role_id"
         },
         {
             type: "list",
-            message: "What is the manager id? (1-Tom, 2-Anna, 3-Bradley)",
-            choices:[1, 2, 3],
+            message: "Who is the employee's manager? (0-None, 1-Tom, 2-Anna, 3-Bradley)",
+            choices:[0, 1, 2, 3],
             name: "manager_id"
         }
     ]).then(function({first_name, last_name, role_id, manager_id}){
@@ -150,21 +150,27 @@ function viewAllRoles(){
 function addRole(){
     return inquirer.prompt([
         {
-            type: "list",
-            message: "What role would you like to add?",
-            choices: ["salesperson", "engineer", "laywer"],
-            name: "title"
+            type: "input",
+            message: "What is the name of the role?",
+            name: "title",
+            validate: function validateTitle(name) {
+                return name !== '';
+            }
         },
         {
             type: "input",
-            message: "What is the salary?",
-            name: "salary"
+            message: "What is the salary of the role?",
+            name: "salary",
+            validate: function validateSalary(name) {
+                return name !== '';
+            }
         },
         {
             type: "list",
-            message: "What is the department id? (1-sales, 2-legal, 3-engineer",
-            choices:[1, 2, 3],
-            name: "department_id"
+            message: "Which department does this role belong to? (1-sales, 2-legal, 3-engineering)",
+            choices: [1, 2, 3],
+            name: "department_id",
+            
         }
     ]).then(function({title, salary, department_id}){
         var queryString = `INSERT INTO roles (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
@@ -195,7 +201,7 @@ function addDepartment(){
     return inquirer.prompt([
         {
             type: "input",
-            message: "What department would you like to add?",
+            message: "What is the name of the department?",
             name: "name",
             validate: function validateFirst (name){
                 return name !== '';
@@ -218,5 +224,6 @@ function addDepartment(){
 
 // quit (REQ)
 function quitNode(){
-    connection.end();
+    console.log("Goodbye!");
+    return connection.end();
 };
