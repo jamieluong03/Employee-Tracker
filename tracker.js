@@ -72,37 +72,6 @@ function promptUser(){
     });
 };
 
-// promptUser()
-//     .then(function({option}){
-//         this.option = option;
-
-//         switch(option){
-//             case "View All Employees": 
-//                 viewAllEmployees();
-//                 break;
-//             case "Add Employee": 
-//                 addEmployee();
-//                 break;
-//             case "Update Employee":
-//                 updateEmployee();
-//                 break;
-//             case "View All Roles":
-//                 viewAllRoles();
-//                 break;
-//             case "Add Role":
-//                 addRole();
-//                 break;
-//             case "View All Departments":
-//                 viewAllDepartments();
-//                 break;
-//             case "Add Department":
-//                 addDepartment();
-//                 break;
-//             default:
-//                 quitNode();
-//         }
-        
-//     })
 
 // view all employees (REQ)
 function viewAllEmployees(){
@@ -139,17 +108,25 @@ function addEmployee(){
         },
         {
             type: "list",
-            message: "What is the role id?",
-            choices: [],
+            message: "What is the role id? (1-salesperson, 2-lawyer, 3-engineer)",
+            choices: [1, 2, 3],
             name: "role_id"
         },
         {
-            type: "input",
-            message: "What is the manager id?",
-            choices:[],
+            type: "list",
+            message: "What is the manager id? (1-Tom, 2-Anna, 3-Bradley)",
+            choices:[1, 2, 3],
             name: "manager_id"
         }
-    ])
+    ]).then(function({first_name, last_name, role_id, manager_id}){
+        var queryString = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
+        connection.query(queryString, function(err, result){
+            if (err) throw err;
+            console.log(result);
+            viewAllEmployees();
+            promptUser();
+        });
+    })
 }
 
 // remove employee (BONUS)
@@ -175,16 +152,29 @@ function addRole(){
         {
             type: "list",
             message: "What role would you like to add?",
-            choices: [],
+            choices: ["salesperson", "engineer", "laywer"],
             name: "title"
         },
         {
             type: "input",
-            message: "What is the department id?",
-            choices:[],
+            message: "What is the salary?",
+            name: "salary"
+        },
+        {
+            type: "list",
+            message: "What is the department id? (1-sales, 2-legal, 3-engineer",
+            choices:[1, 2, 3],
             name: "department_id"
         }
-    ])
+    ]).then(function({title, salary, department_id}){
+        var queryString = `INSERT INTO roles (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
+        connection.query(queryString, function(err, result) {
+            if (err) throw err;
+            console.log(result);
+            viewAllRoles();
+            promptUser();
+        })
+    })
 }
 
 
@@ -205,33 +195,22 @@ function addDepartment(){
     return inquirer.prompt([
         {
             type: "input",
-            message: "Enter first name",
-            name: "first_name",
-            // validate: function validateFirst (name){
-            //     return name! == '';
-            // }
-        },
-        {
-            type: "input",
-            message: "Enter last name",
-            name: "last_name",
-            // validate: function validateLast(name) {
-            //     return name! =='';
-            // }
-        },
-        {
-            type: "list",
-            message: "What is the role id?",
-            choices: [],
-            name: "role_id"
-        },
-        {
-            type: "input",
-            message: "What is the manager id?",
-            choices:[],
-            name: "manager_id"
+            message: "What department would you like to add?",
+            name: "name",
+            validate: function validateFirst (name){
+                return name !== '';
+            }
         }
-    ])
+    ]).then(function({name}){
+        var queryString = `INSERT INTO department (name) VALUES ('${name}')`;
+        connection.query(queryString, function (err, result){
+            if (err) throw err;
+            console.log(result);
+            viewAllDepartments();
+            promptUser();
+        })
+
+    })
 }
 
 
