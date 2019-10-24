@@ -21,6 +21,8 @@ connection.connect(function(err) {
 });
 
 // prompt user first question
+promptUser();
+
 function promptUser(){
     return inquirer.prompt([
         {
@@ -39,9 +41,6 @@ function promptUser(){
             name: "option"
         }
     ])
-};
-
-promptUser()
     .then(function({option}){
         this.option = option;
 
@@ -70,18 +69,88 @@ promptUser()
             default:
                 quitNode();
         }
+    });
+};
+
+// promptUser()
+//     .then(function({option}){
+//         this.option = option;
+
+//         switch(option){
+//             case "View All Employees": 
+//                 viewAllEmployees();
+//                 break;
+//             case "Add Employee": 
+//                 addEmployee();
+//                 break;
+//             case "Update Employee":
+//                 updateEmployee();
+//                 break;
+//             case "View All Roles":
+//                 viewAllRoles();
+//                 break;
+//             case "Add Role":
+//                 addRole();
+//                 break;
+//             case "View All Departments":
+//                 viewAllDepartments();
+//                 break;
+//             case "Add Department":
+//                 addDepartment();
+//                 break;
+//             default:
+//                 quitNode();
+//         }
         
-    })
+//     })
 
 // view all employees (REQ)
-function viewAllEmployees(){}
+function viewAllEmployees(){
+    var queryString = "SELECT * FROM employee";
+    connection.query(queryString, function (err, result) {
+        if (err) throw err;
+        console.table(result);
+        promptUser();
+    });
+};
 
 // view all employees by department (BONUS)
 
 // view all employees by manager (BONUS)
 
 // add employee (REQ)
-function addEmployee(){}
+function addEmployee(){
+    return inquirer.prompt([
+        {
+            type: "input",
+            message: "Enter first name",
+            name: "first_name",
+            // validate: function validateFirst (name){
+            //     return name! == '';
+            // }
+        },
+        {
+            type: "input",
+            message: "Enter last name",
+            name: "last_name",
+            // validate: function validateLast(name) {
+            //     return name! =='';
+            // }
+        },
+        {
+            type: "list",
+            message: "What is the role id?",
+            choices: [],
+            name: "role_id"
+        },
+        {
+            type: "input",
+            message: "What is the manager id?",
+            choices:[],
+            name: "manager_id"
+        }
+    ])
+}
 
 // remove employee (BONUS)
 
@@ -91,19 +160,84 @@ function updateEmployee(){}
 // update employee manager (BONUS)
 
 // view all roles (REQ)
-function viewAllRoles(){}
+function viewAllRoles(){
+    var queryString = "SELECT * FROM roles";
+    connection.query(queryString, function (err, result){
+        if (err) throw err;
+        console.table(result);
+        promptUser();
+    });
+};
 
 // add role (REQ)
-function addRole(){}
+function addRole(){
+    return inquirer.prompt([
+        {
+            type: "list",
+            message: "What role would you like to add?",
+            choices: [],
+            name: "title"
+        },
+        {
+            type: "input",
+            message: "What is the department id?",
+            choices:[],
+            name: "department_id"
+        }
+    ])
+}
+
 
 // remove role (BONUS)
 
 // view all departments (REQ)
-function viewAllDepartments(){};
+function viewAllDepartments(){
+    var queryString = "SELECT * FROM department";
+    connection.query(queryString, function (err, result){
+        if (err) throw err;
+        console.table(result);
+        promptUser();
+    });
+};
 
 // add department (REQ)
-function addDepartment(){}
+function addDepartment(){
+    return inquirer.prompt([
+        {
+            type: "input",
+            message: "Enter first name",
+            name: "first_name",
+            // validate: function validateFirst (name){
+            //     return name! == '';
+            // }
+        },
+        {
+            type: "input",
+            message: "Enter last name",
+            name: "last_name",
+            // validate: function validateLast(name) {
+            //     return name! =='';
+            // }
+        },
+        {
+            type: "list",
+            message: "What is the role id?",
+            choices: [],
+            name: "role_id"
+        },
+        {
+            type: "input",
+            message: "What is the manager id?",
+            choices:[],
+            name: "manager_id"
+        }
+    ])
+}
+
+
 // remove department (BONUS)
 
 // quit (REQ)
-function quitNode(){};
+function quitNode(){
+    connection.end();
+};
