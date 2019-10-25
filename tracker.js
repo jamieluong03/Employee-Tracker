@@ -11,71 +11,93 @@ var connection = mysql.createConnection({
     database: "employeeTracker_db"
 });
 
+var roles;
 // initiate mysql connection
-connection.connect(function(err) {
+connection.connect(function (err) {
     if (err) {
         console.error("error connecting:" + err.stack);
         return;
     }
     console.log("Connected as id " + connection.threadId);
+    // prompt user first question
+    connection.query("SELECT id, title FROM roles", function(error, data){
+//console.log(error, data)
+        roles =  data.map(role => ({ "name": role.title, "value": role.id }))
+        console.log("-->", roles);
+ 
+        promptUser();
+    })
+   
+   
 });
 
-// prompt user first question
-promptUser();
 
-function promptUser(){
+// db access
+// async function viewroles() {
+//     const roles = await findallroles()      // [{name:"salesperson", value:1},{name::lawyer, value:2}]
+//     const roleschoices = roles.map(role => ({ "name": role.title, "value": role.id }))
+//     return roleschoices
+//     console.log(roleschoices)
+// }
+function findallroles() {
+     connection.query("SELET id, title FROM roles", function(roles){
+         return  roles.map(role => ({ "name": role.title, "value": role.id }))
+     })
+}
+
+function promptUser() {
     return inquirer.prompt([
         {
-          type: "list", 
-          message: "What would you like to do?",
-          choices: [
-            "View All Employees",
-            "Add Employee",
-            "Update Employee",
-            "View All Roles",
-            "Add Role",
-            "View All Departments",
-            "Add Department",
-            "Quit"
+            type: "list",
+            message: "What would you like to do?",
+            choices: [
+                "View All Employees",
+                "Add Employee",
+                "Update Employee",
+                "View All Roles",
+                "Add Role",
+                "View All Departments",
+                "Add Department",
+                "Quit"
             ],
             name: "option"
         }
     ])
-    .then(function({option}){
-        this.option = option;
+        .then(function ({ option }) {
+            this.option = option;
 
-        switch(option){
-            case "View All Employees": 
-                viewAllEmployees();
-                break;
-            case "Add Employee": 
-                addEmployee();
-                break;
-            case "Update Employee":
-                updateEmployee();
-                break;
-            case "View All Roles":
-                viewAllRoles();
-                break;
-            case "Add Role":
-                addRole();
-                break;
-            case "View All Departments":
-                viewAllDepartments();
-                break;
-            case "Add Department":
-                addDepartment();
-                break;
-            default:
-                quitNode();
-        }
-    });
+            switch (option) {
+                case "View All Employees":
+                    viewAllEmployees();
+                    break;
+                case "Add Employee":
+                    addEmployee();
+                    break;
+                case "Update Employee":
+                    updateEmployee();
+                    break;
+                case "View All Roles":
+                    viewAllRoles();
+                    break;
+                case "Add Role":
+                    addRole();
+                    break;
+                case "View All Departments":
+                    viewAllDepartments();
+                    break;
+                case "Add Department":
+                    addDepartment();
+                    break;
+                default:
+                    quitNode();
+            }
+        });
 };
 
 
 // view all employees (REQ)
-function viewAllEmployees(){
-    var queryString = "SELECT * FROM employee";
+function viewAllEmployees() {
+    var queryString = "SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, department.name as department, manager.first_name as manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id ";
     connection.query(queryString, function (err, result) {
         if (err) throw err;
         console.table(result);
@@ -88,13 +110,13 @@ function viewAllEmployees(){
 // view all employees by manager (BONUS)
 
 // add employee (REQ)
-function addEmployee(){
+function addEmployee() {
     return inquirer.prompt([
         {
             type: "input",
             message: "What is the employee's first name?",
             name: "first_name",
-            validate: function validateFirst (name){
+            validate: function validateFirst(name) {
                 return name !== '';
             }
         },
@@ -109,18 +131,18 @@ function addEmployee(){
         {
             type: "list",
             message: "What is the employee's role? (1-salesperson, 2-lawyer, 3-engineer)",
-            choices: [1, 2, 3],
+            choices: roles,
             name: "role_id"
         },
         {
             type: "list",
             message: "Who is the employee's manager? (0-None, 1-Tom, 2-Anna, 3-Bradley)",
-            choices:[0, 1, 2, 3],
+            choices: [0, 1, 2, 3],
             name: "manager_id"
         }
-    ]).then(function({first_name, last_name, role_id, manager_id}){
+    ]).then(function ({ first_name, last_name, role_id, manager_id }) {
         var queryString = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
-        connection.query(queryString, function(err, result){
+        connection.query(queryString, function (err, result) {
             if (err) throw err;
             console.log(result);
             viewAllEmployees();
@@ -132,14 +154,14 @@ function addEmployee(){
 // remove employee (BONUS)
 
 // update employee role (REQ)
-function updateEmployee(){}
+function updateEmployee() { }
 
 // update employee manager (BONUS)
 
 // view all roles (REQ)
-function viewAllRoles(){
+function viewAllRoles() {
     var queryString = "SELECT * FROM roles";
-    connection.query(queryString, function (err, result){
+    connection.query(queryString, function (err, result) {
         if (err) throw err;
         console.table(result);
         promptUser();
@@ -147,7 +169,7 @@ function viewAllRoles(){
 };
 
 // add role (REQ)
-function addRole(){
+function addRole() {
     return inquirer.prompt([
         {
             type: "input",
@@ -170,11 +192,11 @@ function addRole(){
             message: "Which department does this role belong to? (1-sales, 2-legal, 3-engineering)",
             choices: [1, 2, 3],
             name: "department_id",
-            
+
         }
-    ]).then(function({title, salary, department_id}){
+    ]).then(function ({ title, salary, department_id }) {
         var queryString = `INSERT INTO roles (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
-        connection.query(queryString, function(err, result) {
+        connection.query(queryString, function (err, result) {
             if (err) throw err;
             console.log(result);
             viewAllRoles();
@@ -187,9 +209,9 @@ function addRole(){
 // remove role (BONUS)
 
 // view all departments (REQ)
-function viewAllDepartments(){
+function viewAllDepartments() {
     var queryString = "SELECT * FROM department";
-    connection.query(queryString, function (err, result){
+    connection.query(queryString, function (err, result) {
         if (err) throw err;
         console.table(result);
         promptUser();
@@ -197,19 +219,19 @@ function viewAllDepartments(){
 };
 
 // add department (REQ)
-function addDepartment(){
+function addDepartment() {
     return inquirer.prompt([
         {
             type: "input",
             message: "What is the name of the department?",
             name: "name",
-            validate: function validateFirst (name){
+            validate: function validateFirst(name) {
                 return name !== '';
             }
         }
-    ]).then(function({name}){
+    ]).then(function ({ name }) {
         var queryString = `INSERT INTO department (name) VALUES ('${name}')`;
-        connection.query(queryString, function (err, result){
+        connection.query(queryString, function (err, result) {
             if (err) throw err;
             console.log(result);
             viewAllDepartments();
@@ -223,7 +245,10 @@ function addDepartment(){
 // remove department (BONUS)
 
 // quit (REQ)
-function quitNode(){
+function quitNode() {
     console.log("Goodbye!");
     return connection.end();
 };
+
+
+
