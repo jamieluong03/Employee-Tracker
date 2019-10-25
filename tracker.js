@@ -21,13 +21,11 @@ connection.connect(function (err) {
     console.log("Connected as id " + connection.threadId);
     // prompt user first question
     connection.query("SELECT id, title FROM roles", function(error, data){
-//console.log(error, data)
         roles =  data.map(role => ({ "name": role.title, "value": role.id }))
-        console.log("-->", roles);
- 
+    //     console.log("-->", roles);
+
         promptUser();
     })
-   
    
 });
 
@@ -39,11 +37,11 @@ connection.connect(function (err) {
 //     return roleschoices
 //     console.log(roleschoices)
 // }
-function findallroles() {
-     connection.query("SELET id, title FROM roles", function(roles){
-         return  roles.map(role => ({ "name": role.title, "value": role.id }))
-     })
-}
+// function findallroles() {
+//      connection.query("SELET id, title FROM roles", function(roles){
+//          return  roles.map(role => ({ "name": role.title, "value": role.id }))
+//      })
+// }
 
 function promptUser() {
     return inquirer.prompt([
@@ -97,7 +95,7 @@ function promptUser() {
 
 // view all employees (REQ)
 function viewAllEmployees() {
-    var queryString = "SELECT employee.id, employee.first_name, employee.last_name, roles.title, roles.salary, department.name as department, manager.first_name as manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id ";
+    var queryString = "SELECT employee.id, employee.first_name, employee.last_name, roles.title as position, roles.salary, department.name as department, manager.first_name as manager FROM employee LEFT JOIN roles on employee.role_id = roles.id LEFT JOIN department on roles.department_id = department.id LEFT JOIN employee manager on manager.id = employee.manager_id ";
     connection.query(queryString, function (err, result) {
         if (err) throw err;
         console.table(result);
@@ -136,11 +134,20 @@ function addEmployee() {
         },
         {
             type: "list",
-            message: "Who is the employee's manager? (0-None, 1-Tom, 2-Anna, 3-Bradley)",
-            choices: [0, 1, 2, 3],
+            message: "Who is the employee's manager?",
+            choices: ["None", "John", "Mike", "Tom"],
             name: "manager_id"
         }
     ]).then(function ({ first_name, last_name, role_id, manager_id }) {
+        if (manager_id === "John"){
+            manager_id = 1
+        } else if (manager_id === "Mike"){
+            manager_id = 2
+        } else if (manager_id === "Tom"){
+            manager_id = 3;
+        } else if (manager_id === "None"){
+            manager_id = null
+        }
         var queryString = `INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES ('${first_name}', '${last_name}', ${role_id}, ${manager_id})`;
         connection.query(queryString, function (err, result) {
             if (err) throw err;
@@ -170,7 +177,8 @@ function viewAllRoles() {
 
 // add role (REQ)
 function addRole() {
-    return inquirer.prompt([
+    
+    inquirer.prompt([
         {
             type: "input",
             message: "What is the name of the role?",
@@ -190,11 +198,19 @@ function addRole() {
         {
             type: "list",
             message: "Which department does this role belong to? (1-sales, 2-legal, 3-engineering)",
-            choices: [1, 2, 3],
+            choices: ["sales", "legal", "engineering"],
             name: "department_id",
 
         }
     ]).then(function ({ title, salary, department_id }) {
+        if (department_id === "sales"){
+            department_id = 1
+        } else if (department_id === "legal"){
+            department_id = 2
+        } else if (department_id === "engineering"){
+            department_id = 3
+        }
+        
         var queryString = `INSERT INTO roles (title, salary, department_id) VALUES ('${title}', ${salary}, ${department_id})`;
         connection.query(queryString, function (err, result) {
             if (err) throw err;
@@ -240,7 +256,6 @@ function addDepartment() {
 
     })
 }
-
 
 // remove department (BONUS)
 
