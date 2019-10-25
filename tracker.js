@@ -167,7 +167,7 @@ function updateEmployee() { }
 
 // view all roles (REQ)
 function viewAllRoles() {
-    var queryString = "SELECT * FROM roles";
+    var queryString = "SELECT roles.title as position, roles.salary, department.name FROM roles LEFT JOIN department on roles.id = department.id";
     connection.query(queryString, function (err, result) {
         if (err) throw err;
         console.table(result);
