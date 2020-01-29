@@ -8,3 +8,13 @@ This application is used to track employees that are saved in a database. The tr
 * View All Roles
 * Add Department
 * View All Departments
+
+<img src="tracker.png">
+
+## Technologies Used
+* Javascript, jQuery, Node.js, MySQL
+
+## Instructions
+* Clone this repository
+* Open the Git Bash terminal and redirect to the repository folder
+* Run command "node tracker.js"
